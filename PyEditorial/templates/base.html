@@ -40,7 +40,7 @@
         }
         
         #sidebar {
-            width: 300px;
+            width: 400px;
             background-color: var(--primary-color);
             color: white;
         }
@@ -269,6 +269,8 @@
         .post-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background-color: #ecf0f1;
+
         }
         
         .post-image {
@@ -313,9 +315,17 @@
             cursor: pointer;
             padding: 5px;
             color: #777;
+            transition: transform 0.2s ease, color 0.3s ease;
+
         }
+        .vote-buttons button:active {
+    transform: scale(0.9);
+}
+
         
         .vote-buttons button:hover {
+            transform: scale(1.2);
+
             color: var(--accent-color);
         }
         
@@ -326,7 +336,13 @@
         .vote-buttons .downvote:hover {
             color: var(--secondary-color);
         }
-        
+        .vote-buttons .upvote.active {
+    color: #2ecc71;
+}
+
+.vote-buttons .downvote.active {
+    color: #e74c3c;
+}
         .vote-count {
             margin: 0 10px;
             font-weight: bold;
