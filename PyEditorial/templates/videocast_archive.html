@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <!-- Section - Videocast Archive -->
+    <section id="videocast-archive">
+        <header class="section-header">
+            <h2>{% translate 'Videocast Archive' %}</h2>
+        </header>
+
+        <!-- Videocasts Grid -->
+        <div class="videocasts-grid">
+            {% for object in object_list %}
+                <article class="videocast-card">
+                    <!-- Thumbnail -->
+                    <a href="{% url 'content:videocast_single' object.slug %}" class="videocast-thumbnail" title="{{ object.title }}">
+                        <img src="{{ object.thumbnail.url }}" alt="{{ object.title }}"/>
+                        <div class="play-button">
+                            <i class="fa fa-play"></i>
+                        </div>
+                    </a>
+
+                    <!-- Content -->
+                    <div class="videocast-content">
+                        <h3 class="videocast-title">
+                            <a href="{% url 'content:videocast_single' object.slug %}">{{ object.title }}</a>
+                        </h3>
+                        <p>{{ object.content|safe|truncatewords_html:30 }}</p>
+                        <ul class="actions">
+                            <li>
+                                <a href="{% url 'content:videocast_single' object.slug %}" class="button" title="{{ object.title }}">
+                                    {% translate 'Watch Now' %}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </article>
+            {% empty %}
+                <!-- Fallback Message -->
+                <p>{% translate 'No videocasts found.' %}</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Styling for Videocast Archive -->
+    <style>
+        #videocast-archive {
+            margin-top: 40px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section-header h2 {
+            font-size: 2em;
+            color: var(--primary-color);
+        }
+
+        .videocasts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .videocast-card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .videocast-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .videocast-thumbnail {
+            position: relative;
+            display: block;
+            overflow: hidden;
+        }
+
+        .videocast-thumbnail img {
+            width: 100%;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .videocast-thumbnail:hover img {
+            transform: scale(1.05);
+        }
+
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+        }
+
+        .videocast-content {
+            padding: 15px;
+        }
+
+        .videocast-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .videocast-title a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .videocast-title a:hover {
+            color: var(--accent-color);
+        }
+
+        .actions {
+            margin-top: 15px;
+        }
+    </style>
+{% endblock %}

@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<section id="create-podcast-category">
+    <header class="main">
+        <h1>{% translate 'Create Podcast Category' %}</h1>
+        <p class="subtitle">{% translate 'Add a new category to organize your podcasts' %}</p>
+    </header>
+
+    <!-- Form Container -->
+    <div class="form-container">
+        <!-- Display Messages -->
+        {% if messages %}
+            <div class="messages">
+                <h2>{% translate 'Messages' %}</h2>
+                <ul>
+                    {% for message in messages %}
+                        <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Display Errors -->
+        {% if form.errors %}
+            <div class="errors">
+                <h2>{% translate 'Errors' %}</h2>
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error|escape }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error|escape }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Podcast Category Form -->
+        <form method="post" id="podcast_category_form" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-grid">
+                <!-- Title Field -->
+                <div class="form-field">
+                    {{ form.title.label_tag }}
+                    {{ form.title }}
+                    <small class="help-text">{% translate 'Enter a descriptive name for this podcast category' %}</small>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" class="button primary">
+                        <i class="fa fa-plus-circle"></i> {% translate 'Add Category' %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Styling for Podcast Category Form -->
+<style>
+    #create-podcast-category {
+        margin: 40px auto;
+        max-width: 800px;
+        padding: 30px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .main h1 {
+        text-align: center;
+        font-size: 2.5em;
+        color: var(--primary-color);
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #666;
+        margin-top: 0;
+        margin-bottom: 30px;
+    }
+
+    .form-container {
+        margin-top: 20px;
+    }
+
+    .messages, .errors {
+        margin-bottom: 25px;
+        padding: 15px 20px;
+        border-radius: 8px;
+    }
+
+    .messages {
+        background-color: #e3f7e8;
+        border-left: 4px solid #28a745;
+    }
+
+    .errors {
+        background-color: #fff2f2;
+        border-left: 4px solid #dc3545;
+    }
+
+    .messages h2, .errors h2 {
+        font-size: 1.2em;
+        color: #333;
+        margin-top: 0;
+    }
+
+    .messages ul, .errors ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+
+    .messages li {
+        color: #28a745;
+    }
+
+    .errors li {
+        color: #dc3545;
+    }
+
+    #podcast_category_form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .form-field {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-field label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .form-field input[type="text"] {
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        font-size: 1em;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-field input[type="text"]:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+    }
+
+    .help-text {
+        font-size: 0.85em;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 25px;
+        border-radius: 6px;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .button i {
+        margin-right: 8px;
+    }
+
+    .button.primary {
+        background-color: var(--accent-color);
+        color: white;
+    }
+
+    .button.primary:hover {
+        background-color: var(--secondary-color);
+        transform: translateY(-2px);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        #create-podcast-category {
+            padding: 20px;
+            margin: 20px auto;
+        }
+        
+        .button {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock content %}

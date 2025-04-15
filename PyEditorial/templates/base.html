@@ -1,0 +1,623 @@
+{% load static %}
+{% load i18n %}
+{% get_media_prefix as MEDIA_URL %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>ManipalHub | {{ config.SITE_TITLE }}</title>
+    <meta name="description" content="{{ config.SITE_DESCRIPTION }}">
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" href="{% static '/assets/css/main.css' %}"/>
+    <link rel="icon" href="{{ MEDIA_URL }}{{ config.SITE_FAVICON }}" type="image/png" sizes="16x16">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1c3b6a;
+            --secondary-color: #e74c3c;
+            --accent-color: #3498db;
+            --text-color: #333;
+            --light-bg: #f8f9fa;
+            --dark-bg: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+            background-color: #f0f2f5;
+        }
+        
+        #wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        #main {
+            flex: 1;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        }
+        
+        #sidebar {
+            width: 300px;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        #header {
+            padding: 15px 0;
+            border-bottom: 1px solid #eaeaea;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--primary-color);
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .logo:before {
+            content: "";
+            display: inline-block;
+            background: url('/static/assets/images/logo.png') no-repeat;
+            background-size: contain;
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        
+        .icons {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .icons li {
+            margin-left: 15px;
+        }
+        
+        .icons a {
+            color: var(--primary-color);
+            font-size: 1.2em;
+            transition: color 0.3s ease;
+        }
+        
+        .icons a:hover {
+            color: var(--secondary-color);
+        }
+        
+        #search input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        #search input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+        
+        #menu {
+            padding: 20px;
+        }
+        
+        #menu h2 {
+            color: white;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        #menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        #menu ul li {
+            margin-bottom: 10px;
+        }
+        
+        #menu ul li a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 8px 0;
+            transition: all 0.3s ease;
+        }
+        
+        #menu ul li a:hover {
+            color: var(--secondary-color);
+            padding-left: 5px;
+        }
+        
+        .opener {
+            display: block;
+            color: white;
+            cursor: pointer;
+            padding: 8px 0;
+            font-weight: bold;
+        }
+        
+        .opener:after {
+            content: "\f105";
+            font-family: "Font Awesome 5 Free";
+            float: right;
+            transition: transform 0.3s ease;
+        }
+        
+        .opener.active:after {
+            transform: rotate(90deg);
+        }
+        
+        #menu ul ul {
+            padding-left: 15px;
+            display: none;
+        }
+        
+        .button {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        
+        .button:hover {
+            background-color: #2980b9;
+        }
+        
+        #podcast, #get_in_touch {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        #podcast h2, #get_in_touch h2 {
+            color: white;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .mini-posts article {
+            background-color: rgba(255,255,255,0.05);
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .mini-posts .image {
+            border-radius: 5px;
+            overflow: hidden;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .mini-posts img {
+            width: 100%;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+        
+        .mini-posts img:hover {
+            transform: scale(1.05);
+        }
+        
+        .mini-posts p {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        
+        .contact {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .contact li {
+            margin-bottom: 10px;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .contact li a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .contact li a:hover {
+            color: var(--secondary-color);
+        }
+        
+        #footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        
+        .copyright {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.8em;
+        }
+        
+        .copyright a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+        }
+        
+        /* Content-specific styles */
+        .post-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .post-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .post-content {
+            padding: 20px;
+        }
+        
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #777;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        
+        .post-title {
+            color: var(--primary-color);
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        
+        .post-excerpt {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .vote-buttons {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        .vote-buttons button {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px;
+            color: #777;
+        }
+        
+        .vote-buttons button:hover {
+            color: var(--accent-color);
+        }
+        
+        .vote-buttons .upvote:hover {
+            color: #2ecc71;
+        }
+        
+        .vote-buttons .downvote:hover {
+            color: var(--secondary-color);
+        }
+        
+        .vote-count {
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        
+        .comment-count {
+            display: flex;
+            align-items: center;
+            color: #777;
+        }
+        
+        .comment-count i {
+            margin-right: 5px;
+        }
+        
+        /* Responsive design */
+        @media screen and (max-width: 980px) {
+            #wrapper {
+                flex-direction: column;
+            }
+            
+            #sidebar {
+                width: 100%;
+                order: 2;
+            }
+            
+            #main {
+                order: 1;
+            }
+        }
+    </style>
+</head>
+<body class="is-preload">
+    
+    <!-- Wrapper -->
+    <div id="wrapper">
+    
+        <!-- Main -->
+        <div id="main">
+            <div class="inner">
+    
+                <!-- Header -->
+                <header id="header">
+                    <a href="{% url 'content:index' %}" class="logo">ManipalHub</a>
+                    <ul class="icons">
+                        {% if config.SOCIAL_NETWORKS_TWITTER_URL != '#' %}
+                            <li><a href="{{ config.SOCIAL_NETWORKS_TWITTER_URL }}" class="icon brands fa-twitter"
+                                   title="Twitter"><span class="label">{% translate 'Twitter' %}</span></a></li>
+                        {% endif %}
+                        {% if config.SOCIAL_NETWORKS_FACEBOOK_URL != '#' %}
+                            <li><a href="{{ config.SOCIAL_NETWORKS_FACEBOOK_URL }}" class="icon brands fa-facebook-f"
+                                   title="Facebook"><span class="label">{% translate 'Facebook' %}</span></a></li>
+                        {% endif %}
+                        {% if config.SOCIAL_NETWORKS_INSTAGRAM_URL != '#' %}
+                            <li><a href="{{ config.SOCIAL_NETWORKS_INSTAGRAM_URL }}" class="icon brands fa-instagram"
+                                   title="Instagram"><span class="label">{% translate 'Instagram' %}</span></a></li>
+                        {% endif %}
+                        {% if config.SOCIAL_NETWORKS_GITHUB_URL != '#' %}
+                            <li><a href="{{ config.SOCIAL_NETWORKS_GITHUB_URL }}" class="icon brands fa-github"
+                                   title="Github"><span class="label">{% translate 'Github' %}</span></a></li>
+                        {% endif %}
+                        {% if user.is_authenticated %}
+                            <li><a href="#" class="icon solid fa-bell" title="Notifications"><span class="label">Notifications</span></a></li>
+                            <li><a href="#" class="icon solid fa-user" title="Profile"><span class="label">Profile</span></a></li>
+                        {% endif %}
+                    </ul>
+                </header>
+                <!-- /Header -->
+    
+                {% block content %}
+                <!-- Example content that showcases reddit-like features -->
+                <section>
+                    <div class="post-card">
+                        <img src="/api/placeholder/800/200" alt="Post image" class="post-image">
+                        <div class="post-content">
+                            <div class="post-meta">
+                                <span>Posted by u/student123 • 2 hours ago</span>
+                                <span>Computer Science</span>
+                            </div>
+                            <h3 class="post-title">Any tips for surviving the Data Structures exam?</h3>
+                            <div class="post-excerpt">
+                                <p>I'm really struggling with the complexity analysis topics. Has anyone found good resources or tutoring options on campus?</p>
+                            </div>
+                            <div class="vote-buttons">
+                                <button class="upvote"><i class="fa fa-arrow-up"></i></button>
+                                <span class="vote-count">42</span>
+                                <button class="downvote"><i class="fa fa-arrow-down"></i></button>
+                                <div class="comment-count" style="margin-left: auto;">
+                                    <i class="fa fa-comment"></i> 18 comments
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="post-card">
+                        <div class="post-content">
+                            <div class="post-meta">
+                                <span>Posted by u/campus_events • 1 day ago</span>
+                                <span>Events</span>
+                            </div>
+                            <h3 class="post-title">Tech Fest 2025 - Registration Now Open!</h3>
+                            <div class="post-excerpt">
+                                <p>The annual Manipal Tech Fest is back with exciting competitions, workshops, and guest speakers from top tech companies. Registration deadline is April 25th.</p>
+                            </div>
+                            <div class="vote-buttons">
+                                <button class="upvote"><i class="fa fa-arrow-up"></i></button>
+                                <span class="vote-count">128</span>
+                                <button class="downvote"><i class="fa fa-arrow-down"></i></button>
+                                <div class="comment-count" style="margin-left: auto;">
+                                    <i class="fa fa-comment"></i> 35 comments
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                {% endblock %}
+    
+            </div>
+        </div>
+    
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <div class="inner">
+    
+                <!-- Search -->
+                <section id="search" class="alt">
+                    <form method="GET" action="{% url 'content:search' %}">
+                        <input type="text" name="query" id="query" placeholder="{% translate 'Search ManipalHub' %}" required>
+                    </form>
+                </section>
+                <!-- /Search -->
+    
+                <!-- Menu -->
+                <nav id="menu">
+                    <header class="major">
+                        <h2>Menu</h2>
+                    </header>
+                    <ul>
+                        <li><a href="{% url 'content:index' %}"><i class="fa fa-home"></i> {% translate 'Home' %}</a></li>
+                        <li><a href="{% url 'content:blog' %}"><i class="fa fa-rss"></i> {% translate 'Posts' %}</a></li>
+                        <li>
+                            <span class="opener"><i class="fa fa-hashtag"></i> {% translate 'Communities' %}</span>
+                            <ul>
+                            {% for blog_category in blog_categories %}
+                                {% if blog_category.pk %}
+                                    <li><a href="{% url 'content:blog_archive_by_category_pk' blog_category.pk %}">{{ blog_category.title }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+    
+                                <li><a href="#">Computer Science</a></li>
+                                <li><a href="#">Engineering</a></li>
+                                <li><a href="#">Medical</a></li>
+                                <li><a href="#">Campus Events</a></li>
+                                <li><a href="#">Student Clubs</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="{% url 'content:videocast' %}"><i class="fa fa-video"></i> {% translate 'Videos' %}</a></li>
+                        <li><a href="{% url 'content:podcast' %}"><i class="fa fa-podcast"></i> {% translate 'Podcasts' %}</a></li>
+                        {% if user.is_anonymous %}
+                        <li><a href="{% url 'content:login' %}"><i class="fa fa-sign-in-alt"></i> {% translate 'Login' %}</a></li>
+                        <li><a href="{% url 'content:signin' %}"><i class="fa fa-user-plus"></i> {% translate 'Sign Up' %}</a></li>
+                    {% endif %}
+                    
+                        {% if user.is_authenticated %}
+                        <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> {% translate 'Logout' %}</a></li>
+    
+                        <li>
+                            <span class="opener"><i class="fa fa-plus-circle"></i> {% translate 'Create New' %}</span>
+                            <ul>
+                                <li><a href="{% url 'content:blog_create' %}">{% translate 'New Post' %}</a></li>
+                                <li><a href="{% url 'content:videocast_create' %}">{% translate 'New Video' %}</a></li>
+                                <li><a href="{% url 'content:podcast_create' %}">{% translate 'New Podcast' %}</a></li>
+                                <li><a href="{% url 'content:skill_create' %}">{% translate 'New Poll' %}</a></li>
+                            </ul>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                <!-- /Menu -->
+    
+                <!-- Section - trending -->
+                <section id="podcast">
+                    <header class="major">
+                        <h2>{% translate 'Trending Now' %}</h2>
+                    </header>
+                    <div class="mini-posts">
+                        {% for podcast in podcasts %}
+                            <article>
+                                <a href="{% url 'content:podcast_single' podcast.slug %}" class="image">
+                                    <img src="{{ podcast.thumbnail.url }}" alt="{{ podcast.title }}"/>
+                                </a>
+                                <p>{{ podcast.content | safe |truncatewords_html:15 }}</p>
+                                <a href="{% url 'content:podcast_single' podcast.slug %}" class="button">{% translate 'More' %}</a>
+                            </article>
+                        {% endfor %}
+                        <article>
+                            <a href="#" class="image">
+                                <img src="/api/placeholder/300/200" alt="Campus Event"/>
+                            </a>
+                            <p>Tech Fest 2025 registrations are now open with exciting competitions and workshops!</p>
+                            <a href="#" class="button">{% translate 'More' %}</a>
+                        </article>
+                        <article>
+                            <a href="#" class="image">
+                                <img src="/api/placeholder/300/200" alt="Academic News"/>
+                            </a>
+                            <p>Manipal ranked in top 10 private universities for the third consecutive year.</p>
+                            <a href="#" class="button">{% translate 'More' %}</a>
+                        </article>
+                    </div>
+                </section>
+                <!-- /Section - trending -->
+    
+                {% if config.GET_IN_TOUCH_ACTIVE == 'yes' %}
+                    <!-- get_in_touch -->
+                    <section id="get_in_touch">
+                        <header class="major">
+                            <h2>{% translate 'Campus Connect' %}</h2>
+                        </header>
+                        <p>{{ config.GET_IN_TOUCH_INFO | safe }}</p>
+                        <p>Have questions or suggestions? Connect with the ManipalHub team!</p>
+                        <ul class="contact">
+                            <li class="icon solid fa-envelope">
+                                <a href="mailto:{{ config.GET_IN_TOUCH_EMAIL_ADDRESS }}">support@manipalhub.edu</a>
+                            </li>
+                            <li class="icon solid fa-phone">
+                                +91 1234567890
+                            </li>
+                            <li class="icon solid fa-map-marker-alt">
+                                Student Activity Center<br>
+                                Manipal Institute of Technology<br>
+                                Manipal, Karnataka
+                            </li>
+                        </ul>
+                    </section>
+                    <!-- /get_in_touch -->
+                {% endif %}
+    
+                <!-- Footer -->
+                <footer id="footer">
+                    <p class="copyright">
+                        &copy; 2025 ManipalHub. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms</a></p>
+                </footer>
+                <!-- /Footer -->
+    
+            </div>
+        </div>
+    </div>
+
+<!-- Scripts -->
+<script src="{% static '/assets/js/jquery.min.js' %}"></script>
+<script src="{% static '/assets/js/browser.min.js' %}"></script>
+<script src="{% static '/assets/js/breakpoints.min.js' %}"></script>
+<script src="{% static '/assets/js/util.js' %}"></script>
+<script src="{% static '/assets/js/main.js' %}"></script>
+<script>
+    // Toggle submenus
+    document.querySelectorAll('.opener').forEach(function(opener) {
+        opener.addEventListener('click', function() {
+            this.classList.toggle('active');
+            let submenu = this.nextElementSibling;
+            if (submenu.style.display === "block") {
+                submenu.style.display = "none";
+            } else {
+                submenu.style.display = "block";
+            }
+        });
+    });
+    
+    // Vote functionality
+    document.querySelectorAll('.vote-buttons button').forEach(function(button) {
+        button.addEventListener('click', function() {
+            let voteCount = this.parentElement.querySelector('.vote-count');
+            let currentCount = parseInt(voteCount.textContent);
+            
+            if (this.classList.contains('upvote')) {
+                voteCount.textContent = currentCount + 1;
+                this.style.color = '#2ecc71';
+                this.parentElement.querySelector('.downvote').style.color = '#777';
+            } else {
+                voteCount.textContent = currentCount - 1;
+                this.style.color = '#e74c3c';
+                this.parentElement.querySelector('.upvote').style.color = '#777';
+            }
+        });
+    });
+</script>
+<!-- /Scripts -->
+
+{% block custom_script %}
+{% endblock custom_script %}
+
+</body>
+</html>

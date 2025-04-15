@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<section id="create-videocast-category">
+    <header class="main">
+        <h1>{% translate 'Create Video Cast Category' %}</h1>
+    </header>
+
+    <!-- Form Container -->
+    <div class="form-container">
+        <!-- Display Messages -->
+        {% if messages %}
+            <div class="messages">
+                <h2>{% translate 'Messages :' %}</h2>
+                <ul>
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Display Errors -->
+        {% if form.errors %}
+            <div class="errors">
+                <h2>{% translate 'Errors :' %}</h2>
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ error|escape }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error|escape }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Videocast Category Form -->
+        <form method="post" id="videocast_category_form" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-grid">
+                <!-- Title Field -->
+                <div class="form-field">
+                    {{ form.title.label_tag }}
+                    {{ form.title }}
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <input type="submit" value="{% translate 'Add Video Cast Category' %}" class="button primary">
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Styling for Videocast Category Form -->
+<style>
+    #create-videocast-category {
+        margin: 40px auto;
+        max-width: 800px;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .main h1 {
+        text-align: center;
+        font-size: 2em;
+        color: var(--primary-color);
+    }
+
+    .form-container {
+        margin-top: 20px;
+    }
+
+    .messages, .errors {
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+    }
+
+    .messages h2, .errors h2 {
+        font-size: 1.2em;
+        color: var(--secondary-color);
+    }
+
+    .messages ul, .errors ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .messages li, .errors li {
+        color: var(--text-color);
+    }
+
+    #videocast_category_form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .form-field {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-field label {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .form-field input[type="text"] {
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-size: 1em;
+    }
+
+    .form-actions {
+        text-align: center;
+    }
+
+    .button.primary {
+        background-color: var(--accent-color);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    .button.primary:hover {
+        background-color: var(--secondary-color);
+    }
+</style>
+
+{% endblock content %}

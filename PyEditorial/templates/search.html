@@ -1,0 +1,437 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <section id="archive">
+        <header class="major">
+            <h2>{% translate 'Search Results' %}</h2>
+            <p class="search-query">Showing results for: <span class="query-text">{{ query }}</span></p>
+        </header>
+        
+        <!-- Search filter tabs -->
+        <div class="search-filters">
+            <button class="filter-btn active" data-filter="all">All Results</button>
+            <button class="filter-btn" data-filter="blogs">Posts</button>
+            <button class="filter-btn" data-filter="videocasts">Videos</button>
+            <button class="filter-btn" data-filter="podcasts">Podcasts</button>
+        </div>
+        
+        <div class="search-results">
+            {% if not blogs and not videocasts and not podcasts %}
+                <div class="no-results">
+                    <i class="fa fa-search fa-3x"></i>
+                    <h3>No results found</h3>
+                    <p>Try different keywords or check your spelling</p>
+                </div>
+            {% endif %}
+            
+            <!-- Blog results -->
+            {% for blog in blogs %}
+                <article class="result-item blog-result">
+                    <div class="result-content">
+                        <div class="result-meta">
+                            <span class="result-type"><i class="fa fa-rss"></i> Post</span>
+                            <span class="result-date">{{ blog.created_at|date:"M d, Y" }}</span>
+                        </div>
+                        <a href="{% url 'content:blog_single' blog.slug %}" title="{{ blog.title }}" class="result-title">
+                            <h3>{{ blog.title }}</h3>
+                        </a>
+                        <div class="result-excerpt">{{ blog.content | safe | truncatewords_html:20 }}</div>
+                        <div class="result-footer">
+                            <div class="result-tags">
+                                {% if blog.category %}
+                                    <span class="tag"><i class="fa fa-tag"></i> {{ blog.category.title }}</span>
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'content:blog_single' blog.slug %}" class="read-more">Read More <i class="fa fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                    {% if blog.thumbnail %}
+                        <div class="result-image">
+                            <img src="{{ blog.thumbnail.url }}" alt="{{ blog.title }}" />
+                        </div>
+                    {% endif %}
+                </article>
+            {% endfor %}
+            
+            <!-- Video results -->
+            {% for videocast in videocasts %}
+                <article class="result-item video-result">
+                    <div class="result-content">
+                        <div class="result-meta">
+                            <span class="result-type"><i class="fa fa-video"></i> Video</span>
+                            <span class="result-date">{{ videocast.created_at|date:"M d, Y" }}</span>
+                        </div>
+                        <a href="{% url 'content:videocast_single' videocast.slug %}" title="{{ videocast.title }}" class="result-title">
+                            <h3>{{ videocast.title }}</h3>
+                        </a>
+                        <div class="result-excerpt">{{ videocast.content | safe | truncatewords_html:20 }}</div>
+                        <div class="result-footer">
+                            <div class="result-tags">
+                                {% if videocast.category %}
+                                    <span class="tag"><i class="fa fa-tag"></i> {{ videocast.category.title }}</span>
+                                {% endif %}
+                                <span class="duration"><i class="fa fa-clock"></i> {{ videocast.duration|default:"10:00" }}</span>
+                            </div>
+                            <a href="{% url 'content:videocast_single' videocast.slug %}" class="watch-video">Watch Video <i class="fa fa-play"></i></a>
+                        </div>
+                    </div>
+                    {% if videocast.thumbnail %}
+                        <div class="result-image video-thumbnail">
+                            <img src="{{ videocast.thumbnail.url }}" alt="{{ videocast.title }}" />
+                            <div class="play-icon"><i class="fa fa-play-circle"></i></div>
+                        </div>
+                    {% endif %}
+                </article>
+            {% endfor %}
+            
+            <!-- Podcast results -->
+            {% for podcast in podcasts %}
+                <article class="result-item podcast-result">
+                    <div class="result-content">
+                        <div class="result-meta">
+                            <span class="result-type"><i class="fa fa-podcast"></i> Podcast</span>
+                            <span class="result-date">{{ podcast.created_at|date:"M d, Y" }}</span>
+                        </div>
+                        <a href="{% url 'content:podcast_single' podcast.slug %}" title="{{ podcast.title }}" class="result-title">
+                            <h3>{{ podcast.title }}</h3>
+                        </a>
+                        <div class="result-excerpt">{{ podcast.content | safe | truncatewords_html:20 }}</div>
+                        <div class="result-footer">
+                            <div class="result-tags">
+                                {% if podcast.category %}
+                                    <span class="tag"><i class="fa fa-tag"></i> {{ podcast.category.title }}</span>
+                                {% endif %}
+                                <span class="duration"><i class="fa fa-headphones"></i> {{ podcast.duration|default:"30 min" }}</span>
+                            </div>
+                            <a href="{% url 'content:podcast_single' podcast.slug %}" class="listen-podcast">Listen Now <i class="fa fa-volume-up"></i></a>
+                        </div>
+                    </div>
+                    {% if podcast.thumbnail %}
+                        <div class="result-image">
+                            <img src="{{ podcast.thumbnail.url }}" alt="{{ podcast.title }}" />
+                            <div class="audio-icon"><i class="fa fa-headphones"></i></div>
+                        </div>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+{% endblock %}
+
+{% block custom_script %}
+<script>
+    // Filter functionality for search results
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const resultItems = document.querySelectorAll('.result-item');
+        
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Update active button
+                filterBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filter = this.getAttribute('data-filter');
+                
+                // Show/hide results based on filter
+                resultItems.forEach(item => {
+                    if (filter === 'all') {
+                        item.style.display = 'flex';
+                    } else if (item.classList.contains(filter + '-result')) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                // Check if no visible results
+                checkNoResults();
+            });
+        });
+        
+        function checkNoResults() {
+            let visibleResults = false;
+            resultItems.forEach(item => {
+                if (item.style.display !== 'none') {
+                    visibleResults = true;
+                }
+            });
+            
+            const noResultsElement = document.querySelector('.no-results');
+            if (!visibleResults) {
+                // Create no results message if it doesn't exist
+                if (!noResultsElement) {
+                    const noResults = document.createElement('div');
+                    noResults.className = 'no-results';
+                    noResults.innerHTML = `
+                        <i class="fa fa-filter fa-3x"></i>
+                        <h3>No results match the selected filter</h3>
+                        <p>Try a different filter option</p>
+                    `;
+                    document.querySelector('.search-results').appendChild(noResults);
+                } else {
+                    noResultsElement.style.display = 'flex';
+                }
+            } else if (noResultsElement) {
+                noResultsElement.style.display = 'none';
+            }
+        }
+        
+        // Get query parameter from URL to display in search query
+        const urlParams = new URLSearchParams(window.location.search);
+        const query = urlParams.get('query');
+        if (query) {
+            const queryText = document.querySelector('.query-text');
+            if (queryText) {
+                queryText.textContent = query;
+            }
+        }
+    });
+</script>
+
+<style>
+    /* Search Results Specific Styles */
+    .search-query {
+        color: #666;
+        margin-bottom: 20px;
+    }
+    
+    .query-text {
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+    .search-input-container {
+        margin-bottom: 20px;
+        position: relative;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+        color: var(--text-color);
+        background-color: white;
+    }
+    
+    .search-input:focus {
+        border-color: var(--accent-color);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+    
+    .search-button {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--primary-color);
+        cursor: pointer;
+        font-size: 1.2rem;
+    }
+    
+    .search-filters {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        padding: 8px 15px;
+        background-color: #f0f2f5;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        cursor: pointer;
+        color: #555;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-btn:hover {
+        background-color: #e0e2e5;
+    }
+    
+    .filter-btn.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+    
+    .search-results {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .result-item {
+        display: flex;
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        padding: 20px;
+        gap: 20px;
+    }
+    
+    .result-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .result-content {
+        flex: 1;
+    }
+    
+    .result-meta {
+        display: flex;
+        justify-content: space-between;
+        color: #777;
+        font-size: 0.85em;
+        margin-bottom: 10px;
+    }
+    
+    .result-type {
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+    
+    .result-title h3 {
+        color: var(--primary-color);
+        margin-bottom: 10px;
+        font-size: 1.4em;
+        transition: color 0.3s ease;
+    }
+    
+    .result-title:hover h3 {
+        color: var(--secondary-color);
+    }
+    
+    .result-excerpt {
+        color: #666;
+        margin-bottom: 15px;
+        line-height: 1.6;
+    }
+    
+    .result-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .result-tags {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .tag, .duration {
+        font-size: 0.85em;
+        color: #666;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .tag i, .duration i {
+        margin-right: 5px;
+    }
+    
+    .read-more, .watch-video, .listen-podcast {
+        color: var(--accent-color);
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        transition: color 0.3s ease;
+    }
+    
+    .read-more i, .watch-video i, .listen-podcast i {
+        margin-left: 5px;
+        transition: transform 0.3s ease;
+    }
+    
+    .read-more:hover, .watch-video:hover, .listen-podcast:hover {
+        color: var(--secondary-color);
+    }
+    
+    .read-more:hover i, .watch-video:hover i, .listen-podcast:hover i {
+        transform: translateX(3px);
+    }
+    
+    .result-image {
+        width: 180px;
+        height: 120px;
+        position: relative;
+        border-radius: 5px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    
+    .result-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .video-thumbnail .play-icon,
+    .result-image .audio-icon {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.3);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .video-thumbnail:hover .play-icon,
+    .result-image:hover .audio-icon {
+        opacity: 1;
+    }
+    
+    .play-icon i, .audio-icon i {
+        color: white;
+        font-size: 2.5em;
+    }
+    
+    .no-results {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 20px;
+        text-align: center;
+        color: #666;
+    }
+    
+    .no-results i {
+        color: var(--primary-color);
+        margin-bottom: 20px;
+        opacity: 0.7;
+    }
+    
+    .no-results h3 {
+        margin-bottom: 10px;
+        color: var(--primary-color);
+    }
+    
+    @media screen and (max-width: 768px) {
+        .result-item {
+            flex-direction: column-reverse;
+        }
+        
+        .result-image {
+            width: 100%;
+            height: 200px;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,362 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <!-- Section - forum posts -->
+    <section id="posts-archive">
+        <header class="major">
+            <div class="posts-header">
+                <h2>{% translate 'Community Posts' %}</h2>
+                <div class="view-controls">
+                    <button class="active" title="Card View"><i class="fa fa-th-large"></i></button>
+                    <button title="Compact View"><i class="fa fa-bars"></i></button>
+                    <select class="sort-options">
+                        <option value="new">Newest</option>
+                        <option value="top">Top Rated</option>
+                        <option value="hot">Trending</option>
+                        <option value="controversial">Controversial</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+        
+        <div class="post-feed">
+            {% for object in object_list %}
+                <div class="post-card">
+                    {% if object.thumbnail %}
+                        <a href="{% url 'content:blog_single' object.slug %}" class="post-image-link">
+                            <img src="{{ object.thumbnail.url }}" alt="{{ object.title }}" class="post-image"/>
+                        </a>
+                    {% endif %}
+                    <div class="post-content">
+                        <div class="post-meta">
+                            <span class="post-category">
+                                {% if object.category.all %}
+                                    {% for cat in object.category.all %}
+                                        <a href="{% url 'content:blog_archive_by_category_pk' cat.pk %}">{{ cat.title }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    General
+                                {% endif %}
+                            </span>
+                            <span class="post-time">Posted {{ object.created_at|timesince }} ago</span>
+                            <span class="post-author">by {{ object.author.username|default:"Anonymous" }}</span>
+                        </div>
+                        
+                        <h3 class="post-title">
+                            <a href="{% url 'content:blog_single' object.slug %}">{{ object.title }}</a>
+                        </h3>
+                        
+                        <div class="post-excerpt">
+                            {{ object.content | safe | truncatewords_html:30 }}
+                        </div>
+                        
+                        <div class="post-actions">
+                            <div class="vote-buttons">
+                                <button class="upvote" title="Upvote"><i class="fa fa-arrow-up"></i></button>
+                                <span class="vote-count">{{ object.votes|default:"0" }}</span>
+                                <button class="downvote" title="Downvote"><i class="fa fa-arrow-down"></i></button>
+                            </div>
+                            
+                            <a href="{% url 'content:blog_single' object.slug %}" class="comment-count">
+                                <i class="fa fa-comment"></i>
+                                <span>{{ object.comments.count|default:"0" }} comments</span>
+                            </a>
+                            
+                            <div class="post-more-actions">
+                                <button class="share-btn" title="Share"><i class="fa fa-share-alt"></i></button>
+                                <button class="save-btn" title="Save"><i class="fa fa-bookmark"></i></button>
+                                <button class="more-btn" title="More"><i class="fa fa-ellipsis-h"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="no-posts">
+                    <i class="fa fa-inbox fa-3x"></i>
+                    <h3>No posts yet</h3>
+                    <p>Be the first to start a discussion!</p>
+                    <a href="{% url 'content:blog_create' %}" class="button">Create Post</a>
+                </div>
+            {% endfor %}
+        </div>
+        
+        {% if is_paginated %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" class="pagination-prev">
+                        <i class="fa fa-chevron-left"></i> Previous
+                    </a>
+                {% endif %}
+                
+                <span class="pagination-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="pagination-next">
+                        Next <i class="fa fa-chevron-right"></i>
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </section>
+    <!-- /Section - forum posts -->
+    
+    <style>
+        #posts-archive {
+            margin-bottom: 40px;
+        }
+        
+        .posts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .view-controls {
+            display: flex;
+            align-items: center;
+        }
+        
+        .view-controls button {
+            background: none;
+            border: none;
+            color: #777;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px 10px;
+            margin-right: 5px;
+            border-radius: 4px;
+        }
+        
+        .view-controls button.active {
+            background-color: #f0f0f0;
+            color: #1c3b6a;
+        }
+        
+        .sort-options {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        
+        .post-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .post-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .post-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .post-image-link {
+            display: block;
+            overflow: hidden;
+            max-height: 300px;
+        }
+        
+        .post-image {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .post-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .post-content {
+            padding: 20px;
+        }
+        
+        .post-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.85em;
+            color: #777;
+            margin-bottom: 10px;
+        }
+        
+        .post-category a {
+            color: #1c3b6a;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        
+        .post-title {
+            margin: 8px 0 12px;
+            font-size: 1.5em;
+        }
+        
+        .post-title a {
+            color: #333;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        .post-title a:hover {
+            color: #3498db;
+        }
+        
+        .post-excerpt {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .post-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .vote-buttons {
+            display: flex;
+            align-items: center;
+        }
+        
+        .vote-buttons button {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px;
+            color: #777;
+            transition: color 0.2s ease;
+        }
+        
+        .vote-buttons .upvote:hover {
+            color: #2ecc71;
+        }
+        
+        .vote-buttons .downvote:hover {
+            color: #e74c3c;
+        }
+        
+        .vote-count {
+            margin: 0 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .comment-count {
+            display: flex;
+            align-items: center;
+            color: #777;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        .comment-count:hover {
+            color: #3498db;
+        }
+        
+        .comment-count i {
+            margin-right: 5px;
+        }
+        
+        .post-more-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .post-more-actions button {
+            background: none;
+            border: none;
+            color: #777;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        
+        .post-more-actions button:hover {
+            color: #3498db;
+        }
+        
+        .no-posts {
+            text-align: center;
+            padding: 50px 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            color: #777;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .no-posts .button {
+            margin-top: 10px;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .pagination a {
+            text-decoration: none;
+            color: #3498db;
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .pagination a:hover {
+            background-color: #f0f2f5;
+        }
+        
+        .pagination-current {
+            padding: 8px 15px;
+            color: #777;
+        }
+        
+        @media (max-width: 768px) {
+            .posts-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .view-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .post-actions {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+            
+            .post-more-actions {
+                width: 100%;
+                justify-content: flex-end;
+                margin-top: 10px;
+            }
+        }
+    </style>
+{% endblock %}

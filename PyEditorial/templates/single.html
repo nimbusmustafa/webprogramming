@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <!-- Main Content Section -->
+    <section id="main-content">
+        <header class="main">
+            <h1 class="content-title">{{ object.title }}</h1>
+        </header>
+
+        <!-- Thumbnail Image -->
+        {% if object.thumbnail %}
+        <div class="content-image">
+            <img src="{{ object.thumbnail.url }}" alt="{{ object.title }}" class="main-thumbnail"/>
+        </div>
+        {% endif %}
+
+        <!-- Blog Content -->
+        <div class="content-body">
+            {{ object.content|safe }}
+        </div>
+
+        <!-- Video Section -->
+        {% if object.video %}
+        <div class="video-section">
+            <a href="{{ object.video }}" class="button primary fit icon solid fa-video">
+                {% translate 'Show Video' %}
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Audio Section -->
+        {% if object.audio %}
+        <div class="audio-section">
+            <a href="{{ object.audio.url }}" class="button primary fit icon solid fa-download">
+                {% translate 'Download Audio' %}
+            </a>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Related Posts Section -->
+    <section id="related-posts">
+        <header class="section-header">
+            <h2>{% translate 'Related Posts' %}</h2>
+        </header>
+        
+        <div class="related-posts-grid">
+            {% for related_post in related_posts %}
+                <article class="related-post-card">
+                    {% if related_post.thumbnail %}
+                    <a href="{% url 'content:blog_single' related_post.slug %}" class="related-post-image-link">
+                        <img src="{{ related_post.thumbnail.url }}" alt="{{ related_post.title }}" class="related-post-image"/>
+                    </a>
+                    {% endif %}
+
+                    <div class="related-post-content">
+                        <h3>
+                            <a href="{% url 'content:blog_single' related_post.slug %}">{{ related_post.title }}</a>
+                        </h3>
+                        <p>{{ related_post.content|safe|truncatewords_html:15 }}</p>
+                    </div>
+                </article>
+            {% empty %}
+                <p>{% translate 'No related posts found.' %}</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Styling for this page -->
+    <style>
+        #main-content {
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-title {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .content-image {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .main-thumbnail {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .content-body {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .video-section, .audio-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #related-posts {
+            margin-top: 40px;
+        }
+
+        .related-posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .related-post-card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .related-post-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .related-post-image-link {
+            display: block;
+            height: auto;
+            overflow: hidden;
+        }
+
+        .related-post-image {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+
+        .related-post-content {
+            padding: 15px;
+        }
+
+        .related-post-content h3 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .related-post-content p {
+            font-size: 0.95em;
+            color: #555;
+        }
+    </style>
+{% endblock %}

@@ -1,0 +1,437 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<section id="create-blog">
+    <header class="main">
+        <h1>{% translate 'Create Blog' %}</h1>
+        <p class="subtitle">{% translate 'Share your knowledge with the world' %}</p>
+    </header>
+
+    <!-- Form Section -->
+    <div class="form-container">
+        <!-- Display Messages -->
+        {% if messages %}
+            <div class="messages">
+                <h2>{% translate 'Messages' %}</h2>
+                <ul>
+                    {% for message in messages %}
+                        <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Display Errors -->
+        {% if form.errors %}
+            <div class="errors">
+                <h2>{% translate 'Errors' %}</h2>
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error|escape }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error|escape }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Blog Form -->
+        <form method="post" id="blog_form" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-grid">
+                <!-- Title Field -->
+                <div class="form-field">
+                    {{ form.title.label_tag }}
+                    {{ form.title }}
+                    {% if form.title.help_text %}
+                        <small class="help-text">{{ form.title.help_text }}</small>
+                    {% endif %}
+                </div>
+
+                <!-- Slug Field -->
+                <div class="form-field">
+                    {{ form.slug.label_tag }}
+                    {{ form.slug }}
+                    {% if form.slug.help_text %}
+                        <small class="help-text">{{ form.slug.help_text }}</small>
+                    {% else %}
+                        <small class="help-text">{% translate 'URL-friendly name for your blog post (e.g., my-first-blog)' %}</small>
+                    {% endif %}
+                </div>
+
+                <!-- Thumbnail Upload -->
+                <div class="form-field">
+                    {{ form.thumbnail.label_tag }}
+                    <div class="file-upload-container">
+                        <label for="{{ form.thumbnail.id_for_label }}" class="file-upload-label">
+                            <i class="fa fa-cloud-upload"></i> {% translate 'Choose Image' %}
+                        </label>
+                        {{ form.thumbnail }}
+                        <span class="selected-file">{% translate 'No file selected' %}</span>
+                    </div>
+                    <small class="help-text">{% translate 'Recommended size: 1200x630 pixels' %}</small>
+                </div>
+
+                <!-- Publish Field -->
+                <div class="form-field checkbox-field">
+                    {{ form.publish }}
+                    <label for="{{ form.publish.id_for_label }}">{{ form.publish.label }}</label>
+                    <small class="help-text">{{ form.publish.help_text }}</small>
+                </div>
+
+                <!-- Category Dropdown -->
+                <div class="form-field">
+                    {{ form.category.label_tag }}
+                    {{ form.category }}
+                    <small class="help-text">{% translate 'Hold Ctrl/Cmd to select multiple categories' %}</small>
+                    <a href="{% url 'content:blog_category_create' %}" class="add-category-link">
+                        <i class="fa fa-plus-circle"></i> {% translate 'Add New Category' %}
+                    </a>
+                </div>
+
+                <!-- Content Editor -->
+                <div class="form-field full-width">
+                    {{ form.content.label_tag }}
+                    {{ form.content }}
+                    <small class="help-text">{% translate 'Write your blog content here using the rich text editor' %}</small>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="button" id="preview-button" class="button secondary">
+                        <i class="fa fa-eye"></i> {% translate 'Preview' %}
+                    </button>
+                    <button type="submit" class="button primary">
+                        <i class="fa fa-save"></i> {% translate 'Publish Blog' %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Styling for Blog Form -->
+<style>
+    #create-blog {
+        margin: 40px auto;
+        max-width: 1000px;
+        padding: 30px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .main h1 {
+        text-align: center;
+        font-size: 2.5em;
+        color: var(--primary-color);
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #666;
+        margin-top: 0;
+        margin-bottom: 30px;
+    }
+
+    .form-container {
+        margin-top: 20px;
+    }
+
+    .messages, .errors {
+        margin-bottom: 25px;
+        padding: 15px 20px;
+        border-radius: 8px;
+    }
+
+    .messages {
+        background-color: #e3f7e8;
+        border-left: 4px solid #28a745;
+    }
+
+    .errors {
+        background-color: #fff2f2;
+        border-left: 4px solid #dc3545;
+    }
+
+    .messages h2, .errors h2 {
+        font-size: 1.2em;
+        color: #333;
+        margin-top: 0;
+    }
+
+    .messages ul, .errors ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+
+    .messages li {
+        color: #28a745;
+    }
+
+    .errors li {
+        color: #dc3545;
+    }
+
+    #blog_form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+
+    .form-field {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-field.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-field label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .form-field input[type="text"], 
+    .form-field select, 
+    .form-field textarea {
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        font-size: 1em;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-field input[type="text"]:focus, 
+    .form-field select:focus, 
+    .form-field textarea:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+    }
+
+    .help-text {
+        font-size: 0.85em;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    .checkbox-field {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .checkbox-field input[type="checkbox"] {
+        margin-right: 10px;
+    }
+
+    .checkbox-field label {
+        margin-bottom: 0;
+    }
+
+    .checkbox-field .help-text {
+        margin-left: 10px;
+    }
+
+    .file-upload-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .file-upload-label {
+        display: inline-block;
+        padding: 10px 15px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9em;
+        transition: background-color 0.3s ease;
+    }
+
+    .file-upload-label:hover {
+        background-color: var(--secondary-color);
+    }
+
+    .file-upload-label i {
+        margin-right: 5px;
+    }
+
+    input[type="file"] {
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+    }
+
+    .selected-file {
+        margin-left: 10px;
+        font-size: 0.9em;
+        color: #666;
+    }
+
+    .add-category-link {
+        font-size: 0.85em;
+        color: var(--primary-color);
+        margin-top: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .add-category-link i {
+        margin-right: 5px;
+    }
+
+    .form-actions {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 25px;
+        border-radius: 6px;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .button i {
+        margin-right: 8px;
+    }
+
+    .button.primary {
+        background-color: var(--accent-color);
+        color: white;
+    }
+
+    .button.primary:hover {
+        background-color: var(--secondary-color);
+        transform: translateY(-2px);
+    }
+
+    .button.secondary {
+        background-color: #f1f1f1;
+        color: #333;
+    }
+
+    .button.secondary:hover {
+        background-color: #e0e0e0;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        #create-blog {
+            padding: 20px;
+            margin: 20px auto;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .button {
+            width: 100%;
+        }
+    }
+</style>
+
+{% endblock content %}
+
+{% block custom_script %}
+<script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+<script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+<script>
+    // Initialize CKEditor for the content field
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize CKEditor
+        CKEDITOR.replace('{{ form.content.id }}', {
+            height: 400,
+            toolbar: [
+                { name: 'document', items: [ 'Source', '-', 'Preview', 'Print' ] },
+                { name: 'clipboard', items: [ 'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo' ] },
+                { name: 'editing', items: [ 'Find', 'Replace', '-', 'SelectAll' ] },
+                { name: 'basicstyles', items: [ 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat' ] },
+                { name: 'paragraph', items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock' ] },
+                { name: 'links', items: [ 'Link', 'Unlink', 'Anchor' ] },
+                { name: 'insert', items: [ 'Image', 'Table', 'HorizontalRule', 'SpecialChar', 'PageBreak' ] },
+                { name: 'styles', items: [ 'Styles', 'Format', 'Font', 'FontSize' ] },
+                { name: 'colors', items: [ 'TextColor', 'BGColor' ] },
+                { name: 'tools', items: [ 'Maximize', 'ShowBlocks' ] }
+            ]
+        });
+
+        // Handle file input change
+        const fileInput = document.getElementById('{{ form.thumbnail.id_for_label }}');
+        const fileLabel = document.querySelector('.selected-file');
+        
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    fileLabel.textContent = this.files[0].name;
+                } else {
+                    fileLabel.textContent = '{% translate "No file selected" %}';
+                }
+            });
+        }
+
+        // Auto-generate slug from title
+        const titleInput = document.getElementById('{{ form.title.id_for_label }}');
+        const slugInput = document.getElementById('{{ form.slug.id_for_label }}');
+        
+        if (titleInput && slugInput) {
+            titleInput.addEventListener('blur', function() {
+                if (slugInput.value.trim() === '') {
+                    // Only auto-generate if slug is empty
+                    const slug = this.value.trim()
+                        .toLowerCase()
+                        .replace(/[^\w\s-]/g, '') // Remove special chars
+                        .replace(/\s+/g, '-')     // Replace spaces with hyphens
+                        .replace(/-+/g, '-');     // Remove consecutive hyphens
+                    
+                    slugInput.value = slug;
+                }
+            });
+        }
+
+        // Preview button functionality
+        const previewButton = document.getElementById('preview-button');
+        if (previewButton) {
+            previewButton.addEventListener('click', function() {
+                alert('{% translate "Preview functionality will be implemented in a future update." %}');
+                // For a real implementation, you might want to open a modal window or a new tab with the preview
+            });
+        }
+    });
+</script>
+{% endblock custom_script %}

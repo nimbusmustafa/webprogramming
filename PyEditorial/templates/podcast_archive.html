@@ -1,0 +1,393 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <!-- Section - podcast archive -->
+    <section id="archive">
+        <header class="major">
+            <h2>{% translate 'Podcast Archive' %}</h2>
+            <p class="archive-description">Discover and listen to all our podcasts featuring student discussions, faculty interviews, and campus news.</p>
+        </header>
+        
+        <!-- Filter options -->
+        <div class="filter-container">
+            <div class="filter-options">
+                <select class="filter-select">
+                    <option value="">All Categories</option>
+                    <option value="tech">Technology</option>
+                    <option value="academic">Academic</option>
+                    <option value="campus">Campus Life</option>
+                    <option value="career">Career</option>
+                </select>
+                
+                <select class="filter-select">
+                    <option value="">Sort By</option>
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="popular">Most Popular</option>
+                </select>
+            </div>
+            <div class="search-podcast">
+                <input type="text" placeholder="Search podcasts..." class="podcast-search">
+                <button class="search-button"><i class="fa fa-search"></i></button>
+            </div>
+        </div>
+        
+        <div class="podcast-grid">
+            {% for object in object_list %}
+                <article class="podcast-card">
+                    <a href="{% url 'content:podcast_single' object.slug %}" class="podcast-image" title="{{ object.title }}">
+                        <img src="{{ object.thumbnail.url }}" alt="{{ object.title }}"/>
+                        <div class="play-overlay">
+                            <i class="fa fa-play-circle"></i>
+                        </div>
+                    </a>
+                    <div class="podcast-content">
+                        <div class="podcast-meta">
+                            <span class="podcast-date"><i class="fa fa-calendar"></i> {{ object.created_at|date:"M d, Y" }}</span>
+                            <span class="podcast-duration"><i class="fa fa-clock"></i> {{ object.duration|default:"30 min" }}</span>
+                        </div>
+                        <h3 class="podcast-title">{{ object.title }}</h3>
+                        <div class="podcast-excerpt">{{ object.content | safe | truncatewords_html:25 }}</div>
+                        <div class="podcast-footer">
+                            <div class="podcast-stats">
+                                <span><i class="fa fa-headphones"></i> {{ object.listen_count|default:"0" }}</span>
+                                <span><i class="fa fa-comment"></i> {{ object.comment_count|default:"0" }}</span>
+                            </div>
+                            <a href="{% url 'content:podcast_single' object.slug %}" class="button" title="{{ object.title }}">
+                                {% translate 'Listen Now' %}
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            {% empty %}
+                <div class="no-podcasts">
+                    <i class="fa fa-podcast fa-3x"></i>
+                    <p>No podcasts found. Check back soon for new content!</p>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="page-nav"><i class="fa fa-angle-left"></i> Previous</a>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="page-num current">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}" class="page-num">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="page-nav">Next <i class="fa fa-angle-right"></i></a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+    <!-- /Section - podcast archive -->
+{% endblock %}
+
+{% block custom_script %}
+<script>
+    // Add podcast-specific functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filter animation
+        const filterSelects = document.querySelectorAll('.filter-select');
+        filterSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                // Here you would add actual filtering logic
+                // This is just for demo animation
+                const podcasts = document.querySelectorAll('.podcast-card');
+                podcasts.forEach(card => {
+                    card.style.opacity = '0.5';
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                    }, 500);
+                });
+            });
+        });
+        
+        // Search functionality
+        const searchInput = document.querySelector('.podcast-search');
+        const searchButton = document.querySelector('.search-button');
+        
+        if (searchButton) {
+            searchButton.addEventListener('click', function() {
+                performSearch();
+            });
+        }
+        
+        if (searchInput) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+        }
+        
+        function performSearch() {
+            // Demo animation
+            const podcasts = document.querySelectorAll('.podcast-card');
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            podcasts.forEach(card => {
+                const title = card.querySelector('.podcast-title').textContent.toLowerCase();
+                if (title.includes(searchTerm) || searchTerm === '') {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        // Play button hover effect
+        const podcastImages = document.querySelectorAll('.podcast-image');
+        podcastImages.forEach(img => {
+            img.addEventListener('mouseenter', function() {
+                const overlay = this.querySelector('.play-overlay');
+                overlay.style.opacity = '1';
+            });
+            
+            img.addEventListener('mouseleave', function() {
+                const overlay = this.querySelector('.play-overlay');
+                overlay.style.opacity = '0';
+            });
+        });
+    });
+</script>
+
+<style>
+    /* Podcast Archive Specific Styles */
+    #archive {
+        padding: 20px 0;
+    }
+    
+    .archive-description {
+        color: #666;
+        margin-bottom: 25px;
+    }
+    
+    .filter-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+    }
+    
+    .filter-options {
+        display: flex;
+        gap: 15px;
+    }
+    
+    .filter-select {
+        padding: 8px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: white;
+        color: var(--primary-color);
+    }
+    
+    .search-podcast {
+        display: flex;
+        max-width: 300px;
+    }
+    
+    .podcast-search {
+        padding: 8px 15px;
+        border: 1px solid #ddd;
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+        border-right: none;
+        width: 100%;
+    }
+    
+    .search-button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+        padding: 0 15px;
+        cursor: pointer;
+    }
+    
+    .podcast-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+    }
+    
+    .podcast-card {
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .podcast-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+    
+    .podcast-image {
+        position: relative;
+        overflow: hidden;
+        height: 180px;
+    }
+    
+    .podcast-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .podcast-card:hover .podcast-image img {
+        transform: scale(1.05);
+    }
+    
+    .play-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(28, 59, 106, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .play-overlay i {
+        color: white;
+        font-size: 50px;
+    }
+    
+    .podcast-content {
+        padding: 20px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .podcast-meta {
+        display: flex;
+        justify-content: space-between;
+        color: #777;
+        font-size: 0.85em;
+        margin-bottom: 10px;
+    }
+    
+    .podcast-title {
+        font-size: 1.3em;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+        line-height: 1.3;
+    }
+    
+    .podcast-excerpt {
+        color: #666;
+        margin-bottom: 15px;
+        line-height: 1.5;
+        flex-grow: 1;
+    }
+    
+    .podcast-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+    }
+    
+    .podcast-stats {
+        display: flex;
+        gap: 15px;
+        color: #777;
+        font-size: 0.9em;
+    }
+    
+    .podcast-card .button {
+        background-color: var(--accent-color);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 0.9em;
+        transition: background-color 0.3s ease;
+    }
+    
+    .podcast-card .button:hover {
+        background-color: #2980b9;
+    }
+    
+    .no-podcasts {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 50px 0;
+        color: #777;
+    }
+    
+    .no-podcasts i {
+        margin-bottom: 15px;
+        color: var(--primary-color);
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+        gap: 5px;
+    }
+    
+    .page-num, .page-nav {
+        padding: 8px 12px;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+    
+    .page-num {
+        background-color: #f5f5f5;
+        color: #333;
+    }
+    
+    .page-num.current {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .page-nav {
+        background-color: var(--accent-color);
+        color: white;
+    }
+    
+    @media screen and (max-width: 768px) {
+        .filter-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .filter-options {
+            margin-bottom: 15px;
+        }
+        
+        .search-podcast {
+            max-width: 100%;
+        }
+        
+        .podcast-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

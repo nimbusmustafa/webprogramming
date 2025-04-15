@@ -1,0 +1,549 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<section id="create-videocast">
+    <header class="main">
+        <h1>{% translate 'Create Video Cast' %}</h1>
+        <p class="subtitle">{% translate 'Share your video content with the community' %}</p>
+    </header>
+
+    <!-- Form Container -->
+    <div class="form-container">
+        <!-- Display Messages -->
+        {% if messages %}
+            <div class="messages">
+                <h2>{% translate 'Messages' %}</h2>
+                <ul>
+                    {% for message in messages %}
+                        <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Display Errors -->
+        {% if form.errors %}
+            <div class="errors">
+                <h2>{% translate 'Errors' %}</h2>
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error|escape }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error|escape }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Videocast Form -->
+        <form method="post" id="videocast_form" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-grid">
+                <!-- Title Field -->
+                <div class="form-field">
+                    {{ form.title.label_tag }}
+                    {{ form.title }}
+                    <small class="help-text">{% translate 'Choose a descriptive title for your video' %}</small>
+                </div>
+
+                <!-- Slug Field -->
+                <div class="form-field">
+                    {{ form.slug.label_tag }}
+                    {{ form.slug }}
+                    <small class="help-text">{% translate 'URL-friendly name (e.g., my-new-video)' %}</small>
+                </div>
+
+                <!-- Thumbnail Upload -->
+                <div class="form-field">
+                    {{ form.thumbnail.label_tag }}
+                    <div class="file-upload-container">
+                        <label for="{{ form.thumbnail.id_for_label }}" class="file-upload-label">
+                            <i class="fa fa-cloud-upload"></i> {% translate 'Choose Thumbnail' %}
+                        </label>
+                        {{ form.thumbnail }}
+                        <span class="selected-file">{% translate 'No file selected' %}</span>
+                    </div>
+                    <small class="help-text">{% translate 'Recommended size: 1280x720 pixels' %}</small>
+                </div>
+
+                <!-- Publish Field -->
+                <div class="form-field checkbox-field">
+                    {{ form.publish }}
+                    <label for="{{ form.publish.id_for_label }}">{{ form.publish.label }}</label>
+                    <small class="help-text">{{ form.publish.help_text }}</small>
+                </div>
+
+                <!-- Category Dropdown -->
+                <div class="form-field">
+                    {{ form.category.label_tag }}
+                    {{ form.category }}
+                    <small class="help-text">{% translate 'Select the most relevant category for your video' %}</small>
+                </div>
+
+                <!-- Video Link Field -->
+                <div class="form-field">
+                    {{ form.video.label_tag }}
+                    {{ form.video }}
+                    <small class="help-text">{% translate 'Enter a YouTube or Vimeo embed link (e.g., https://www.youtube.com/embed/AbC123XyZ)' %}</small>
+                </div>
+
+                <!-- Content Editor -->
+                <div class="form-field full-width">
+                    {{ form.content.label_tag }}
+                    {{ form.content }}
+                    <small class="help-text">{% translate 'Add a detailed description, transcripts, or additional information about your video' %}</small>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="button" id="preview-button" class="button secondary">
+                        <i class="fa fa-eye"></i> {% translate 'Preview' %}
+                    </button>
+                    <button type="submit" class="button primary">
+                        <i class="fa fa-upload"></i> {% translate 'Publish Video' %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Video Preview Modal -->
+<div id="preview-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>{% translate 'Video Preview' %}</h2>
+        <div class="video-preview-container">
+            <div class="video-embed-container">
+                <iframe id="video-preview-frame" src="" frameborder="0" allowfullscreen></iframe>
+            </div>
+            <h3 id="preview-title"></h3>
+            <div id="preview-description"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Styling for Videocast Form -->
+<style>
+    #create-videocast {
+        margin: 40px auto;
+        max-width: 1000px;
+        padding: 30px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .main h1 {
+        text-align: center;
+        font-size: 2.5em;
+        color: var(--primary-color);
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #666;
+        margin-top: 0;
+        margin-bottom: 30px;
+    }
+
+    .form-container {
+        margin-top: 20px;
+    }
+
+    .messages, .errors {
+        margin-bottom: 25px;
+        padding: 15px 20px;
+        border-radius: 8px;
+    }
+
+    .messages {
+        background-color: #e3f7e8;
+        border-left: 4px solid #28a745;
+    }
+
+    .errors {
+        background-color: #fff2f2;
+        border-left: 4px solid #dc3545;
+    }
+
+    .messages h2, .errors h2 {
+        font-size: 1.2em;
+        color: #333;
+        margin-top: 0;
+    }
+
+    .messages ul, .errors ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+
+    .messages li {
+        color: #28a745;
+    }
+
+    .errors li {
+        color: #dc3545;
+    }
+
+    #videocast_form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+
+    .form-field {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-field.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-field label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .form-field input[type="text"], 
+    .form-field select, 
+    .form-field textarea {
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        font-size: 1em;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-field input[type="text"]:focus, 
+    .form-field select:focus, 
+    .form-field textarea:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+    }
+
+    .help-text {
+        font-size: 0.85em;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    .checkbox-field {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .checkbox-field input[type="checkbox"] {
+        margin-right: 10px;
+    }
+
+    .checkbox-field label {
+        margin-bottom: 0;
+    }
+
+    .checkbox-field .help-text {
+        margin-left: 10px;
+    }
+
+    .file-upload-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .file-upload-label {
+        display: inline-block;
+        padding: 10px 15px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9em;
+        transition: background-color 0.3s ease;
+    }
+
+    .file-upload-label:hover {
+        background-color: var(--secondary-color);
+    }
+
+    .file-upload-label i {
+        margin-right: 5px;
+    }
+
+    input[type="file"] {
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+    }
+
+    .selected-file {
+        margin-left: 10px;
+        font-size: 0.9em;
+        color: #666;
+    }
+
+    .form-actions {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 25px;
+        border-radius: 6px;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .button i {
+        margin-right: 8px;
+    }
+
+    .button.primary {
+        background-color: var(--accent-color);
+        color: white;
+    }
+
+    .button.primary:hover {
+        background-color: var(--secondary-color);
+        transform: translateY(-2px);
+    }
+
+    .button.secondary {
+        background-color: #f1f1f1;
+        color: #333;
+    }
+
+    .button.secondary:hover {
+        background-color: #e0e0e0;
+        transform: translateY(-2px);
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 5% auto;
+        padding: 25px;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 900px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        position: relative;
+    }
+
+    .close-modal {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .close-modal:hover {
+        color: #333;
+    }
+
+    .video-preview-container {
+        margin-top: 20px;
+    }
+
+    .video-embed-container {
+        position: relative;
+        padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        height: 0;
+        overflow: hidden;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        background-color: #f0f0f0;
+    }
+
+    .video-embed-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    #preview-title {
+        font-size: 1.5em;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    #preview-description {
+        color: #555;
+        line-height: 1.6;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        #create-videocast {
+            padding: 20px;
+            margin: 20px auto;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .button {
+            width: 100%;
+        }
+        
+        .modal-content {
+            width: 95%;
+            margin: 10% auto;
+            padding: 15px;
+        }
+    }
+</style>
+
+{% endblock content %}
+
+{% block custom_script %}
+<script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+<script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize CKEditor for the content field
+        var editor = CKEDITOR.replace('{{ form.content.id }}', {
+            height: 300,
+            toolbar: [
+                { name: 'document', items: [ 'Source', '-', 'Preview', 'Print' ] },
+                { name: 'clipboard', items: [ 'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo' ] },
+                { name: 'editing', items: [ 'Find', 'Replace', '-', 'SelectAll' ] },
+                { name: 'basicstyles', items: [ 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat' ] },
+                { name: 'paragraph', items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock' ] },
+                { name: 'links', items: [ 'Link', 'Unlink', 'Anchor' ] },
+                { name: 'insert', items: [ 'Image', 'Table', 'HorizontalRule', 'SpecialChar', 'PageBreak' ] },
+                { name: 'styles', items: [ 'Styles', 'Format', 'Font', 'FontSize' ] },
+                { name: 'colors', items: [ 'TextColor', 'BGColor' ] },
+                { name: 'tools', items: [ 'Maximize', 'ShowBlocks' ] }
+            ]
+        });
+
+        // Handle file input change
+        const thumbnailInput = document.getElementById('{{ form.thumbnail.id_for_label }}');
+        const fileLabel = document.querySelector('.selected-file');
+        
+        if (thumbnailInput) {
+            thumbnailInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    fileLabel.textContent = this.files[0].name;
+                } else {
+                    fileLabel.textContent = '{% translate "No file selected" %}';
+                }
+            });
+        }
+
+        // Auto-generate slug from title
+        const titleInput = document.getElementById('{{ form.title.id_for_label }}');
+        const slugInput = document.getElementById('{{ form.slug.id_for_label }}');
+        
+        if (titleInput && slugInput) {
+            titleInput.addEventListener('blur', function() {
+                if (slugInput.value.trim() === '') {
+                    // Only auto-generate if slug is empty
+                    const slug = this.value.trim()
+                        .toLowerCase()
+                        .replace(/[^\w\s-]/g, '') // Remove special chars
+                        .replace(/\s+/g, '-')     // Replace spaces with hyphens
+                        .replace(/-+/g, '-');     // Remove consecutive hyphens
+                    
+                    slugInput.value = slug;
+                }
+            });
+        }
+
+        // Preview modal functionality
+        const modal = document.getElementById('preview-modal');
+        const previewButton = document.getElementById('preview-button');
+        const closeModal = document.querySelector('.close-modal');
+        const videoFrame = document.getElementById('video-preview-frame');
+        const previewTitle = document.getElementById('preview-title');
+        const previewDescription = document.getElementById('preview-description');
+        
+        if (previewButton) {
+            previewButton.addEventListener('click', function() {
+                const title = titleInput.value || 'Video Title Preview';
+                const videoLink = document.getElementById('{{ form.video.id_for_label }}').value;
+                const description = editor.getData();
+                
+                previewTitle.textContent = title;
+                previewDescription.innerHTML = description;
+                
+                // Only set iframe src if a valid video link is provided
+                if (videoLink && (videoLink.includes('youtube.com/embed') || videoLink.includes('vimeo.com'))) {
+                    videoFrame.src = videoLink;
+                } else {
+                    videoFrame.src = '';
+                    previewDescription.innerHTML = '<div class="video-placeholder">Please enter a valid YouTube or Vimeo embed link to preview the video.</div>' + description;
+                }
+                
+                modal.style.display = 'block';
+            });
+        }
+        
+        if (closeModal) {
+            closeModal.addEventListener('click', function() {
+                modal.style.display = 'none';
+                videoFrame.src = ''; // Stop video playback
+            });
+        }
+        
+        // Close modal if clicking outside of it
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                videoFrame.src = ''; // Stop video playback
+            }
+        });
+    });
+</script>
+{% endblock custom_script %}
