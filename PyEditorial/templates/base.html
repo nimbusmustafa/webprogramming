@@ -404,10 +404,10 @@
                             <li><a href="{{ config.SOCIAL_NETWORKS_GITHUB_URL }}" class="icon brands fa-github"
                                    title="Github"><span class="label">{% translate 'Github' %}</span></a></li>
                         {% endif %}
-                        {% if user.is_authenticated %}
+                        <!-- {% if user.is_authenticated %}
                             <li><a href="#" class="icon solid fa-bell" title="Notifications"><span class="label">Notifications</span></a></li>
                             <li><a href="#" class="icon solid fa-user" title="Profile"><span class="label">Profile</span></a></li>
-                        {% endif %}
+                        {% endif %} -->
                     </ul>
                 </header>
                 <!-- /Header -->
@@ -468,11 +468,11 @@
             <div class="inner">
     
                 <!-- Search -->
-                <section id="search" class="alt">
+                <!-- <section id="search" class="alt">
                     <form method="GET" action="{% url 'content:search' %}">
                         <input type="text" name="query" id="query" placeholder="{% translate 'Search ManipalHub' %}" required>
                     </form>
-                </section>
+                </section> -->
                 <!-- /Search -->
     
                 <!-- Menu -->
@@ -483,7 +483,7 @@
                     <ul>
                         <li><a href="{% url 'content:index' %}"><i class="fa fa-home"></i> {% translate 'Home' %}</a></li>
                         <li><a href="{% url 'content:blog' %}"><i class="fa fa-rss"></i> {% translate 'Posts' %}</a></li>
-                        <li>
+                        <!-- <li>
                             <span class="opener"><i class="fa fa-hashtag"></i> {% translate 'Communities' %}</span>
                             <ul>
                             {% for blog_category in blog_categories %}
@@ -498,7 +498,7 @@
                                 <li><a href="#">Campus Events</a></li>
                                 <li><a href="#">Student Clubs</a></li>
                             </ul>
-                        </li>
+                        </li> -->
                         <li><a href="{% url 'content:videocast' %}"><i class="fa fa-video"></i> {% translate 'Videos' %}</a></li>
                         <li><a href="{% url 'content:podcast' %}"><i class="fa fa-podcast"></i> {% translate 'Podcasts' %}</a></li>
                         {% if user.is_anonymous %}
@@ -555,32 +555,33 @@
                     </div>
                 </section>
                 <!-- /Section - trending -->
-    
                 {% if config.GET_IN_TOUCH_ACTIVE == 'yes' %}
-                    <!-- get_in_touch -->
-                    <section id="get_in_touch">
-                        <header class="major">
-                            <h2>{% translate 'Campus Connect' %}</h2>
-                        </header>
-                        <p>{{ config.GET_IN_TOUCH_INFO | safe }}</p>
-                        <p>Have questions or suggestions? Connect with the ManipalHub team!</p>
-                        <ul class="contact">
-                            <li class="icon solid fa-envelope">
-                                <a href="mailto:{{ config.GET_IN_TOUCH_EMAIL_ADDRESS }}">support@manipalhub.edu</a>
-                            </li>
-                            <li class="icon solid fa-phone">
-                                +91 1234567890
-                            </li>
-                            <li class="icon solid fa-map-marker-alt">
-                                Student Activity Center<br>
-                                Manipal Institute of Technology<br>
-                                Manipal, Karnataka
-                            </li>
-                        </ul>
-                    </section>
-                    <!-- /get_in_touch -->
-                {% endif %}
-    
+                <!-- get_in_touch -->
+                <section id="get_in_touch">
+                    <header class="major">
+                        <h2>{% translate 'Campus Connect' %}</h2>
+                    </header>
+                    <p>
+                        Campus Connect is your gateway to a vibrant and inclusive student community at Manipal. Through a range of programs—workshops, networking events, mentorship, and community outreach—Campus Connect helps students engage with peers, faculty, and industry professionals. The initiative is designed to foster personal and academic growth, build professional skills, and create opportunities for career advancement and social impact. By connecting students with mentors and leaders, Campus Connect empowers you to thrive academically, socially, and professionally, while contributing positively to the campus community.
+                    </p>
+                    <p>Have questions or suggestions? Connect with the ManipalHub team!</p>
+                    <ul class="contact">
+                        <li class="icon solid fa-envelope">
+                            <a href="mailto:{{ config.GET_IN_TOUCH_EMAIL_ADDRESS }}">support@manipalhub.edu</a>
+                        </li>
+                        <li class="icon solid fa-phone">
+                            +91 1234567890
+                        </li>
+                        <li class="icon solid fa-map-marker-alt">
+                            Student Activity Center<br>
+                            Manipal Institute of Technology<br>
+                            Manipal, Karnataka
+                        </li>
+                    </ul>
+                </section>
+                <!-- /get_in_touch -->
+            {% endif %}
+            
                 <!-- Footer -->
                 <footer id="footer">
                     <p class="copyright">
